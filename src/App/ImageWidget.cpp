@@ -116,6 +116,11 @@ void ImageWidget::mousePressEvent(QMouseEvent* mouseevent)
 			point_end_.rx() = point_start_.rx() + w - 1;
 			point_end_.ry() = point_start_.ry() + h - 1;
 
+			std::cout << "selected size: " << point_end_.rx() - point_start_.rx() << " x " << point_end_.ry() - point_start_.ry() << std::endl;
+			std::cout << "selected position: " << std::endl;
+			std::cout << "(" << point_start_.rx() << " , " << point_start_.ry() << ")" << std::endl;
+			std::cout << "(" << point_end_.rx() << " , " << point_end_.ry() << ")" << std::endl;
+
 			// Paste
 			if ((xpos + w < image_mat_.cols) && (ypos + h < image_mat_.rows))
 			{
@@ -176,6 +181,11 @@ void ImageWidget::mouseMoveEvent(QMouseEvent* mouseevent)
 			point_end_.rx() = point_start_.rx() + w - 1;
 			point_end_.ry() = point_start_.ry() + h - 1;
 
+			std::cout << "selected size: " << point_end_.rx() - point_start_.rx() << " x " << point_end_.ry() - point_start_.ry() << std::endl;
+			std::cout << "selected position: " << std::endl;
+			std::cout << "(" << point_start_.rx() << " , " << point_start_.ry() << ")" << std::endl;
+			std::cout << "(" << point_end_.rx() << " , " << point_end_.ry() << ")" << std::endl;
+
 			// Paste
 			if ((xpos > 0) && (ypos > 0) && (xpos + w < image_mat_.cols) && (ypos + h < image_mat_.rows))
 			{
@@ -212,6 +222,11 @@ void ImageWidget::mouseReleaseEvent(QMouseEvent* mouseevent)
 		if (is_choosing_)
 		{
 			point_end_ = mouseevent->pos();
+			std::cout << "selected size: " << point_end_.rx() - point_start_.rx() << " x " << point_end_.ry() - point_start_.ry() << std::endl;
+			std::cout << "selected position: " << std::endl;
+			std::cout << "(" << point_start_.rx() << " , " << point_start_.ry() << ")" << std::endl;
+			std::cout << "(" << point_end_.rx() << " , " << point_end_.ry() << ")" << std::endl;
+
 			is_choosing_ = false;
 			draw_status_ = kNone;
 		}
@@ -286,8 +301,6 @@ void ImageWidget::Normal_Cloneing()
 		return;
 
 	SeamlessCloneing*normal_clone = new SeamlessCloneing(image_mat_, image_mat_backup_, point_start_, point_end_);
-	normal_clone->GetPointMatrix();
-	normal_clone->GetNeighborhood();
 	normal_clone->GetTriplet();
 	normal_clone->GetSparseMatrix();
 	normal_clone->Cloneing();

@@ -48,7 +48,7 @@ private:
 	cv::Mat image_source;										//The cut one
 	cv::Mat image_destination;									//The original background
 
-	int order_total;
+	int order_total = 0;
 	VectorXd r, g, b;
 	cv::Point point_start, point_end;
 

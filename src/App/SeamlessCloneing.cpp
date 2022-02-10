@@ -14,7 +14,7 @@ SeamlessCloneing::SeamlessCloneing(cv::Mat source, cv::Mat destination, QPoint s
 {
 	point_start.x = start.rx();
 	point_start.y = start.ry();
-	point_end.x = start.rx();
+	point_end.x = end.rx();
 	point_end.y = end.ry();
 
 	if (!point_matrix.empty())
@@ -48,7 +48,7 @@ void SeamlessCloneing::GetPointMatrix() {
 		for (int j = start_x; j <= end_x; j++)
 		{
 			PointType point_tmp;
-			point_tmp.Axes = cv::Point(i, j);
+			point_tmp.Axes = cv::Point(j, i);
 			point_tmp.order = ord;
 			point_list.push_back(point_tmp);
 
@@ -182,6 +182,7 @@ void SeamlessCloneing::GetSparseMatrix()
 	solver.compute(sparse_matrix);
 }
 
+
 void SeamlessCloneing::Cloneing() 
 {
 	VectorXd br = VectorXd::Zero(order_total);
@@ -221,15 +222,24 @@ void SeamlessCloneing::Cloneing()
 		}
 
 	}
+
+	if (solver.info() != Success)
+	{
+		std::cout << "Error:can't solve the equation" << std::endl;
+		return;
+	}
+	r = solver.solve(br);
+	g = solver.solve(bg);
+	b = solver.solve(bb);
 }
 
 int SeamlessCloneing::Fix(double data)
 {
-	if (data > 255)
+	if (data > 253)
 		return 255;
-	if (data < 0)
+	if (data < 2)
 		return 0;
-	return 0;
+	return int(data);
 }
 
 void SeamlessCloneing::FillImage() 
@@ -243,9 +253,9 @@ void SeamlessCloneing::FillImage()
 			int x = point_matrix[i][j].Axes.x;
 			int y = point_matrix[i][j].Axes.y;
 
-			image_destination.at<cv::Vec3b>(x, y)[0] = Fix(r(ord_tmp));
-			image_destination.at<cv::Vec3b>(x, y)[1] = Fix(g(ord_tmp));
-			image_destination.at<cv::Vec3b>(x, y)[2] = Fix(b(ord_tmp));
+			image_destination.at<cv::Vec3b>(y, x)[0] = Fix(r(ord_tmp));
+			image_destination.at<cv::Vec3b>(y, x)[1] = Fix(g(ord_tmp));
+			image_destination.at<cv::Vec3b>(y, x)[2] = Fix(b(ord_tmp));
 
 			ord_tmp++;
 		}
