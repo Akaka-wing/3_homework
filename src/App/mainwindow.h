@@ -40,7 +40,9 @@ private slots:
 	// Poisson Image Editing
 	void ChooseRect();							// Choose rectangle region
 	void Paste();								// Paste rect region to object image
-	void Normal_Cloneing();							//
+
+	void FirstCloneing();						//
+	void SecondCloneing();
 
 private:
 	void CreateActions();
@@ -68,7 +70,9 @@ private:
 	QAction						*action_mirror_;
 	QAction						*action_gray_;
 	QAction						*action_restore_;
-	QAction						*action_normal_cloneing_;
+
+	QAction						*action_cloneing_first_;					//cloneing with method of importing gradients
+	QAction						*action_cloneing_second_;				//cloneing with method of mixing gradients
 
 	QAction						*action_choose_polygon_;
 	QAction						*action_copy_;

@@ -73,10 +73,10 @@ void ImageWidget::paintEvent(QPaintEvent* paintevent)
 	painter.drawImage(rect, image_show);
 
 	// Draw choose region
-	painter.setBrush(Qt::NoBrush);
+	/*painter.setBrush(Qt::NoBrush);
 	painter.setPen(Qt::red);
 	painter.drawRect(point_start_.x(), point_start_.y(),
-		point_end_.x() - point_start_.x(), point_end_.y() - point_start_.y());
+		point_end_.x() - point_start_.x(), point_end_.y() - point_start_.y());*/
 
 	painter.end();
 }
@@ -121,22 +121,25 @@ void ImageWidget::mousePressEvent(QMouseEvent* mouseevent)
 			std::cout << "(" << point_start_.rx() << " , " << point_start_.ry() << ")" << std::endl;
 			std::cout << "(" << point_end_.rx() << " , " << point_end_.ry() << ")" << std::endl;
 
+			SecondCloneing();
+			//FirstCloneing();
+			
 			// Paste
-			if ((xpos + w < image_mat_.cols) && (ypos + h < image_mat_.rows))
-			{
-				// Restore image
-			//	*(image_) = *(image_backup_);
+			//if ((xpos + w < image_mat_.cols) && (ypos + h < image_mat_.rows))
+			//{
+			//	// Restore image
+			////	*(image_) = *(image_backup_);
 
-				// Paste
-				for (int i = 0; i < w; i++)
-				{
-					for (int j = 0; j < h; j++)
-					{
-						image_mat_.at<cv::Vec3b>(ypos + j, xpos + i) = source_window_->imagewidget_->image().at<cv::Vec3b>(ysourcepos + j, xsourcepos + i);
-						//image_->setPixel(xpos + i, ypos + j, source_window_->imagewidget_->image()->pixel(xsourcepos + i, ysourcepos + j));
-					}
-				}
-			}
+			//	// Paste
+			//	for (int i = 0; i < w; i++)
+			//	{
+			//		for (int j = 0; j < h; j++)
+			//		{
+			//			image_mat_.at<cv::Vec3b>(ypos + j, xpos + i) = source_window_->imagewidget_->image().at<cv::Vec3b>(ysourcepos + j, xsourcepos + i);
+			//			//image_->setPixel(xpos + i, ypos + j, source_window_->imagewidget_->image()->pixel(xsourcepos + i, ysourcepos + j));
+			//		}
+			//	}
+			//}
 			update();
 		}
 		default:
@@ -194,7 +197,7 @@ void ImageWidget::mouseMoveEvent(QMouseEvent* mouseevent)
 				//*(image_) = *(image_backup_);
 
 				// Paste
-				image_mat_ = image_mat_.clone();
+				//image_mat_ = image_mat_.clone();
 				for (int i = 0; i < w; i++)
 				{
 					for (int j = 0; j < h; j++)
@@ -230,7 +233,6 @@ void ImageWidget::mouseReleaseEvent(QMouseEvent* mouseevent)
 			is_choosing_ = false;
 			draw_status_ = kNone;
 		}
-
 	case kPaste:
 		if (is_pasting_)
 		{
@@ -295,16 +297,35 @@ void ImageWidget::SaveAs()
 	//image_->save(filename);
 }
 
-void ImageWidget::Normal_Cloneing()
+void ImageWidget::FirstCloneing()
 {
 	if (image_mat_.empty())
 		return;
 
-	SeamlessCloneing*normal_clone = new SeamlessCloneing(image_mat_, image_mat_backup_, point_start_, point_end_);
+	cv::Mat image_tmp_ = image_mat_.clone();
+	QPoint point_start_source_ = source_window_->imagewidget_->point_start_;
+	QPoint point_end_source_ = source_window_->imagewidget_->point_end_;
+	SeamlessCloneing*normal_clone = new SeamlessCloneing(source_window_->imagewidget_->image(), image_tmp_, point_start_source_, point_end_source_, point_start_);
 	normal_clone->GetTriplet();
 	normal_clone->GetSparseMatrix();
-	normal_clone->Cloneing();
-	normal_clone->FillImage();
+	normal_clone->ImportingCloneing();
+	image_mat_ = normal_clone->GetImage();
+
+	update();
+}
+
+void ImageWidget::SecondCloneing()
+{
+	if (image_mat_.empty())
+		return;
+
+	cv::Mat image_tmp_ = image_mat_.clone();
+	QPoint point_start_source_ = source_window_->imagewidget_->point_start_;
+	QPoint point_end_source_ = source_window_->imagewidget_->point_end_;
+	SeamlessCloneing* normal_clone = new SeamlessCloneing(source_window_->imagewidget_->image(), image_tmp_, point_start_source_, point_end_source_, point_start_);
+	normal_clone->GetTriplet();
+	normal_clone->GetSparseMatrix();
+	normal_clone->MixingCloneing();
 	image_mat_ = normal_clone->GetImage();
 
 	update();
@@ -354,6 +375,7 @@ void ImageWidget::Mirror(bool ishorizontal, bool isvertical)
 				{
 					image_mat_.at<cv::Vec3b>(j, i) = image_tmp_mat_.at<cv::Vec3b>(height - 1 - j, width - 1 - i);
 					//image_->setPixel(i, j, image_tmp.pixel(width - 1 - i, height - 1 - j));
+
 				}
 			}
 		}
@@ -380,6 +402,7 @@ void ImageWidget::Mirror(bool ishorizontal, bool isvertical)
 				{
 					image_mat_.at<cv::Vec3b>(j, i) = image_tmp_mat_.at<cv::Vec3b>(j, width - 1 - i);
 					//image_->setPixel(i, j, image_tmp.pixel(width - 1 - i, j));
+					std::cout << image_mat_.at<cv::Vec3b>(j, i)[0] << "   " << image_mat_.at<cv::Vec3b>(j, i)[1] << "   " << image_mat_.at<cv::Vec3b>(j, i)[2] << std::endl;
 				}
 			}
 		}

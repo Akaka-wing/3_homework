@@ -1,3 +1,13 @@
+//updata of 2022.2.11 22:59
+//need to list:
+//警告也给他消掉
+//画的红线给他标出来，想法是不给它定位point_end,只给point_start,这样是不是只有一个红点这样子
+//modify the point_matrix from the destination posiotion to source position
+//paste mode: normal cloneing, importing cloneing,  or Mixing cloneing
+//把这个类拆成三个小类
+//add polygon painting
+
+
 #pragma once
 
 #include <QWidget>
@@ -19,7 +29,7 @@ public:
 	SeamlessCloneing();
 	~SeamlessCloneing();
 
-	SeamlessCloneing(cv::Mat source, cv::Mat destination, QPoint start, QPoint end);
+	SeamlessCloneing(cv::Mat source, cv::Mat destination, QPoint start_source, QPoint end_source, QPoint start_destination);
 	void GetPointMatrix();
 	void GetIsChosenMatrix();
 	int  GetOrder(cv::Point point);
@@ -28,9 +38,14 @@ public:
 	
 	void GetTriplet();
 	void GetSparseMatrix();
-	void Cloneing();											//set right-side of the equation	
-	int Fix(double data);
-	void FillImage();											//fill desination image with the solution
+	cv::Point Translate(cv::Point destination_point);			//point translate from destination to source position
+	
+	void ImportingCloneing();											//set right-side of the equation	
+	void MixingCloneing();
+
+	bool compare(cv::Vec3b p_s, cv::Vec3b q_s, cv::Vec3b p_d, cv::Vec3b q_d);
+	unsigned char fix(double data);
+	void FillImage(VectorXd r, VectorXd g, VectorXd b);											//fill desination image with the solution
 
 	cv::Mat GetImage();
 public:
@@ -45,12 +60,12 @@ public:
 	}Neighborhood;
 
 private:
-	cv::Mat image_source;										//The cut one
+	cv::Mat image_source;										//source image
 	cv::Mat image_destination;									//The original background
 
 	int order_total = 0;
-	VectorXd r, g, b;
-	cv::Point point_start, point_end;
+	cv::Point source_start, source_end;
+	cv::Point destination_start;
 
 	SimplicialLDLT<SparseMatrix<double>> solver;
 	std::vector<Triplet<double>> A_triplet;

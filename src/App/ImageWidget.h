@@ -60,7 +60,8 @@ public slots:
 	void Mirror(bool horizontal=false, bool vertical=true);		// Mirror image vertically or horizontally
 	void TurnGray();											// Turn image to gray-scale map
 	void Restore();												// Restore image to origin
-	void Normal_Cloneing();
+	void FirstCloneing();
+	void SecondCloneing();
 
 public:
 	QPoint						point_start_;					// Left top point of rectangle region
