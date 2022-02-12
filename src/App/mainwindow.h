@@ -71,12 +71,11 @@ private:
 	QAction						*action_gray_;
 	QAction						*action_restore_;
 
-	QAction						*action_cloneing_first_;					//cloneing with method of importing gradients
-	QAction						*action_cloneing_second_;				//cloneing with method of mixing gradients
-
 	QAction						*action_choose_polygon_;
 	QAction						*action_copy_;
 	QAction						*action_paste_;
+	QAction						*action_cloneing_first_;					//cloneing with method of importing gradients
+	QAction						*action_cloneing_second_;				//cloneing with method of mixing gradients
 
 	QMdiArea					*mdi_area_;
 	QSignalMapper				*window_mapper_;

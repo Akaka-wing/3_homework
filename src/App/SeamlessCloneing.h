@@ -29,25 +29,28 @@ public:
 	SeamlessCloneing();
 	~SeamlessCloneing();
 
-	SeamlessCloneing(cv::Mat source, cv::Mat destination, QPoint start_source, QPoint end_source, QPoint start_destination);
+	SeamlessCloneing(cv::Mat source, cv::Mat destination, cv::Point start_source, cv::Point end_source, cv::Point start_destination);
+	
 	void GetPointMatrix();
-	void GetIsChosenMatrix();
-	int  GetOrder(cv::Point point);
 	void GetNeighborhood();
-	
-	
+
 	void GetTriplet();
 	void GetSparseMatrix();
-	cv::Point Translate(cv::Point destination_point);			//point translate from destination to source position
 	
-	void ImportingCloneing();											//set right-side of the equation	
+	virtual void Cloneing() = 0;											//set right-side of the equation	
 	void MixingCloneing();
 
+	cv::Mat GetImage();
+
+protected:
+	void getischosenmatrix();
+	int getorder(cv::Point point);
+	cv::Point Translate(cv::Point destination_point);			//point translate from destination to source position
 	bool compare(cv::Vec3b p_s, cv::Vec3b q_s, cv::Vec3b p_d, cv::Vec3b q_d);
 	unsigned char fix(double data);
-	void FillImage(VectorXd r, VectorXd g, VectorXd b);											//fill desination image with the solution
+	void imagefill(VectorXd r, VectorXd g, VectorXd b);											//fill desination image with the solution
 
-	cv::Mat GetImage();
+
 public:
 	typedef struct {
 		cv::Point Axes;
@@ -59,7 +62,7 @@ public:
 		std::vector<cv::Point> boundary_points;
 	}Neighborhood;
 
-private:
+protected:
 	cv::Mat image_source;										//source image
 	cv::Mat image_destination;									//The original background
 

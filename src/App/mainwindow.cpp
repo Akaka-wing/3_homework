@@ -73,15 +73,16 @@ void MainWindow::CreateActions()
 	action_choose_polygon_ = new QAction(tr("RectChoose"), this);
 	connect(action_choose_polygon_, SIGNAL(triggered()), this, SLOT(ChooseRect()));
 
-	action_paste_ = new QAction(tr("Paste"), this);
+	action_paste_ = new QAction(tr("PasteNormal"), this);
+	action_paste_->setStatusTip(tr("Normal cloneing"));
 	connect(action_paste_, SIGNAL(triggered()), this, SLOT(Paste()));
 
 	//two methods of seamless cloneing cloneing
-	action_cloneing_first_ = new QAction(tr("First Cloneing"), this);
+	action_cloneing_first_ = new QAction(tr("PasteSeamless"), this);
 	action_cloneing_first_->setStatusTip(tr("Seamless Cloneing using Importing gradients"));
 	connect(action_cloneing_first_, SIGNAL(triggered()), this, SLOT(FirstCloneing()));
 
-	action_cloneing_second_ = new QAction(tr("Second Cloneing"), this);
+	action_cloneing_second_ = new QAction(tr("PasteMixed"), this);
 	action_cloneing_second_->setStatusTip(tr("Seamless Cloneing using Mixing gradients"));
 	connect(action_cloneing_second_, SIGNAL(triggered()), this, SLOT(SecondCloneing()));
 }
@@ -125,7 +126,6 @@ void MainWindow::CreateToolBars()
 	toolbar_file_->addSeparator();
 	toolbar_file_->addAction(action_choose_polygon_);
 	toolbar_file_->addAction(action_paste_);
-	toolbar_file_->addSeparator();
 	toolbar_file_->addAction(action_cloneing_first_);
 	toolbar_file_->addAction(action_cloneing_second_);
 }
@@ -257,6 +257,7 @@ void MainWindow::Paste()
 	if (!window)
 		return;
 	window->imagewidget_->set_draw_status_to_paste();
+	window->imagewidget_->set_clone_status_to_normal();
 	window->imagewidget_->set_source_window(child_source_);
 }
 
@@ -265,7 +266,9 @@ void MainWindow::FirstCloneing()
 	ChildWindow* window = GetChildWindow();
 	if (!window)
 		return;
-	window->imagewidget_->FirstCloneing();
+	window->imagewidget_->set_draw_status_to_paste();
+	window->imagewidget_->set_clone_status_to_importing();
+	window->imagewidget_->set_source_window(child_source_);
 }
 
 void MainWindow::SecondCloneing()
@@ -273,7 +276,9 @@ void MainWindow::SecondCloneing()
 	ChildWindow* window = GetChildWindow();
 	if (!window)
 		return;
-	window->imagewidget_->SecondCloneing();
+	window->imagewidget_->set_draw_status_to_paste();
+	window->imagewidget_->set_clone_status_to_mixing();
+	window->imagewidget_->set_source_window(child_source_);
 }
 
 QMdiSubWindow *MainWindow::FindChild(const QString &filename)

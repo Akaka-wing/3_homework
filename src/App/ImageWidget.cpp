@@ -9,6 +9,7 @@ ImageWidget::ImageWidget(ChildWindow* relatewindow)
 	//image_ = new QImage();
 	//image_backup_ = new QImage();
 
+	clone_status_ = kkNone;
 	draw_status_ = kNone;
 	is_choosing_ = false;
 	is_pasting_ = false;
@@ -33,6 +34,21 @@ int ImageWidget::ImageHeight()
 {
 	//return image_->height();
 	return image_mat_.rows;
+}
+
+void ImageWidget::set_clone_status_to_normal()
+{
+	clone_status_ = kNormal;
+}
+
+void ImageWidget::set_clone_status_to_importing()
+{
+	clone_status_ = kImporting;
+}
+
+void ImageWidget::set_clone_status_to_mixing()
+{
+	clone_status_ = kMixing;
 }
 
 void ImageWidget::set_draw_status_to_choose()
@@ -73,10 +89,10 @@ void ImageWidget::paintEvent(QPaintEvent* paintevent)
 	painter.drawImage(rect, image_show);
 
 	// Draw choose region
-	/*painter.setBrush(Qt::NoBrush);
+	painter.setBrush(Qt::NoBrush);
 	painter.setPen(Qt::red);
 	painter.drawRect(point_start_.x(), point_start_.y(),
-		point_end_.x() - point_start_.x(), point_end_.y() - point_start_.y());*/
+		point_end_.x() - point_start_.x(), point_end_.y() - point_start_.y());
 
 	painter.end();
 }
@@ -112,34 +128,50 @@ void ImageWidget::mousePressEvent(QMouseEvent* mouseevent)
 				- source_window_->imagewidget_->point_start_.ry() + 1;
 
 			//set point_start_ && point_end_
-			point_start_ = mouseevent->pos();
+			/*point_start_ = mouseevent->pos();
 			point_end_.rx() = point_start_.rx() + w - 1;
 			point_end_.ry() = point_start_.ry() + h - 1;
 
 			std::cout << "selected size: " << point_end_.rx() - point_start_.rx() << " x " << point_end_.ry() - point_start_.ry() << std::endl;
 			std::cout << "selected position: " << std::endl;
 			std::cout << "(" << point_start_.rx() << " , " << point_start_.ry() << ")" << std::endl;
-			std::cout << "(" << point_end_.rx() << " , " << point_end_.ry() << ")" << std::endl;
+			std::cout << "(" << point_end_.rx() << " , " << point_end_.ry() << ")" << std::endl;*/
 
-			SecondCloneing();
-			//FirstCloneing();
+			if ((xpos > 0) && (ypos > 0) && (xpos + w < image_mat_.cols) && (ypos + h < image_mat_.rows))
+			{
+				cv::Mat image_tmp_ = image_mat_.clone();
+				
+				cv::Point point_start_source_ = cv::Point(xsourcepos, ysourcepos);
+				cv::Point point_end_source_ = cv::Point(xsourcepos + w - 1, ysourcepos + h - 1);
+
+				switch (clone_status_)
+				{
+				case kNormal:
+				{
+					NormalCloneing* normal_clone = new NormalCloneing(source_window_->imagewidget_->image(), image_tmp_, point_start_source_, point_end_source_, cv::Point(xpos, ypos));
+					normal_clone->Cloneing();
+					image_mat_ = normal_clone->GetImage();
+					break;
+				}
+				case kImporting:
+				{
+					ImportingCloneing* normal_clone = new ImportingCloneing(source_window_->imagewidget_->image(), image_tmp_, point_start_source_, point_end_source_, cv::Point(xpos, ypos));
+					normal_clone->Cloneing();
+					image_mat_ = normal_clone->GetImage();
+					break;
+				}
+				case kMixing:
+				{
+					MixingCloneing* normal_clone = new MixingCloneing(source_window_->imagewidget_->image(), image_tmp_, point_start_source_, point_end_source_, cv::Point(xpos, ypos));
+					normal_clone->Cloneing();
+					image_mat_ = normal_clone->GetImage();
+					break;
+				}
+				default:
+					break;
+				}
+			}
 			
-			// Paste
-			//if ((xpos + w < image_mat_.cols) && (ypos + h < image_mat_.rows))
-			//{
-			//	// Restore image
-			////	*(image_) = *(image_backup_);
-
-			//	// Paste
-			//	for (int i = 0; i < w; i++)
-			//	{
-			//		for (int j = 0; j < h; j++)
-			//		{
-			//			image_mat_.at<cv::Vec3b>(ypos + j, xpos + i) = source_window_->imagewidget_->image().at<cv::Vec3b>(ysourcepos + j, xsourcepos + i);
-			//			//image_->setPixel(xpos + i, ypos + j, source_window_->imagewidget_->image()->pixel(xsourcepos + i, ysourcepos + j));
-			//		}
-			//	}
-			//}
 			update();
 		}
 		default:
@@ -179,16 +211,6 @@ void ImageWidget::mouseMoveEvent(QMouseEvent* mouseevent)
 			int h = source_window_->imagewidget_->point_end_.ry()
 				- source_window_->imagewidget_->point_start_.ry() + 1;
 
-			//set point_start_ && point_end_
-			point_start_ = mouseevent->pos();
-			point_end_.rx() = point_start_.rx() + w - 1;
-			point_end_.ry() = point_start_.ry() + h - 1;
-
-			std::cout << "selected size: " << point_end_.rx() - point_start_.rx() << " x " << point_end_.ry() - point_start_.ry() << std::endl;
-			std::cout << "selected position: " << std::endl;
-			std::cout << "(" << point_start_.rx() << " , " << point_start_.ry() << ")" << std::endl;
-			std::cout << "(" << point_end_.rx() << " , " << point_end_.ry() << ")" << std::endl;
-
 			// Paste
 			if ((xpos > 0) && (ypos > 0) && (xpos + w < image_mat_.cols) && (ypos + h < image_mat_.rows))
 			{
@@ -203,7 +225,6 @@ void ImageWidget::mouseMoveEvent(QMouseEvent* mouseevent)
 					for (int j = 0; j < h; j++)
 					{
 						image_mat_.at<cv::Vec3b>(ypos + j, xpos + i) = source_window_->imagewidget_->image().at<cv::Vec3b>(ysourcepos + j, xsourcepos + i);
-						//image_->setPixel(xpos + i, ypos + j, source_window_->imagewidget_->image()->pixel(xsourcepos + i, ysourcepos + j));
 					}
 				}
 			}
@@ -238,6 +259,7 @@ void ImageWidget::mouseReleaseEvent(QMouseEvent* mouseevent)
 		{
 			is_pasting_ = false;
 			draw_status_ = kNone;
+			clone_status_ = kkNone;
 		}
 
 	default:
@@ -297,39 +319,7 @@ void ImageWidget::SaveAs()
 	//image_->save(filename);
 }
 
-void ImageWidget::FirstCloneing()
-{
-	if (image_mat_.empty())
-		return;
 
-	cv::Mat image_tmp_ = image_mat_.clone();
-	QPoint point_start_source_ = source_window_->imagewidget_->point_start_;
-	QPoint point_end_source_ = source_window_->imagewidget_->point_end_;
-	SeamlessCloneing*normal_clone = new SeamlessCloneing(source_window_->imagewidget_->image(), image_tmp_, point_start_source_, point_end_source_, point_start_);
-	normal_clone->GetTriplet();
-	normal_clone->GetSparseMatrix();
-	normal_clone->ImportingCloneing();
-	image_mat_ = normal_clone->GetImage();
-
-	update();
-}
-
-void ImageWidget::SecondCloneing()
-{
-	if (image_mat_.empty())
-		return;
-
-	cv::Mat image_tmp_ = image_mat_.clone();
-	QPoint point_start_source_ = source_window_->imagewidget_->point_start_;
-	QPoint point_end_source_ = source_window_->imagewidget_->point_end_;
-	SeamlessCloneing* normal_clone = new SeamlessCloneing(source_window_->imagewidget_->image(), image_tmp_, point_start_source_, point_end_source_, point_start_);
-	normal_clone->GetTriplet();
-	normal_clone->GetSparseMatrix();
-	normal_clone->MixingCloneing();
-	image_mat_ = normal_clone->GetImage();
-
-	update();
-}
 
 void ImageWidget::Invert()
 {

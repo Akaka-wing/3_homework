@@ -4,6 +4,9 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/core/core.hpp>
 #include <SeamlessCloneing.h>
+#include <ImportingCloneing.h>
+#include "NormalCloneing.h"
+#include "MixingCloneing.h"
 
 #include <QImage>
 #include <QPainter>
@@ -19,6 +22,14 @@ class QImage;
 class QPainter;
 class SeamlessCloneing;
 QT_END_NAMESPACE
+
+enum CloneType
+{
+	kkNone,
+	kNormal,
+	kImporting,
+	kMixing
+};
 
 enum DrawStatus
 {
@@ -38,6 +49,10 @@ public:
 
 	int ImageWidth();											// Width of image
 	int ImageHeight();											// Height of image
+	void set_clone_status_to_normal();
+	void set_clone_status_to_importing();
+	void set_clone_status_to_mixing();
+
 	void set_draw_status_to_choose();
 	void set_draw_status_to_paste();
 	cv::Mat image();
@@ -60,8 +75,7 @@ public slots:
 	void Mirror(bool horizontal=false, bool vertical=true);		// Mirror image vertically or horizontally
 	void TurnGray();											// Turn image to gray-scale map
 	void Restore();												// Restore image to origin
-	void FirstCloneing();
-	void SecondCloneing();
+	
 
 public:
 	QPoint						point_start_;					// Left top point of rectangle region
@@ -78,6 +92,7 @@ private:
 
 	// Signs
 	DrawStatus					draw_status_;					// Enum type of draw status
+	CloneType					clone_status_;
 	bool						is_choosing_;
 	bool						is_pasting_;
 };
